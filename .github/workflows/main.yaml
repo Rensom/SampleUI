@@ -36,10 +36,10 @@ jobs:
         mkdir -p /home/runner/.ssh;
         echo ${{ secrets.NODE_PRIVATE_KEY }} | base64 -d > /home/runner/.ssh/id_rsa
         chmod 600 /home/runner/.ssh/id_rsa
-        echo ${{ secrets.NODE_PUBLIC_KEY }} | base64 -d > /home/runner/.ssh/id_rsa.pub
         ssh-keyscan -H ${{ secrets.REMOTE_HOST }} > /home/runner/.ssh/known_hosts
         echo "====> $(pwd)"
         echo "====> $(whoami)"
+        
     - name: Create docker context
       run: |
         docker context create remote \
