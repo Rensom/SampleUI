@@ -40,7 +40,7 @@ jobs:
         ssh-keyscan -H ${{ secrets.REMOTE_HOST }} > /home/runner/.ssh/known_hosts
         docker context create remote \
             --description "Docker remote test" \
-            --docker "host=ssh://${{ env.REMOTE_USERN }}@${{ env.REMOTE_HOST_IP }}";
+            --docker "host=ssh://${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}";
     - name: Login to Harbor
       run: |
         echo "${{ secrets.HARBOR_SA }}" | base64 -d > ./robot.json;
@@ -73,7 +73,7 @@ jobs:
         ssh-keyscan -H ${{ secrets.REMOTE_HOST_PROD }} > /home/runner/.ssh/known_hosts
         docker context create remote \
             --description "Docker remote test" \
-            --docker "host=ssh://${{ secrets.REMOTE_USERN }}@${{ secrets.REMOTE_HOST_PROD }}";
+            --docker "host=ssh://${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST_PROD }}";
     - name: Login to Harbor
       run: |
         echo "${{ secrets.HARBOR_SA }}" | base64 -d > ./robot.json;
