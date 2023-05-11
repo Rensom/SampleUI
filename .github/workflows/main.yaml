@@ -38,13 +38,10 @@ jobs:
         mkdir -p /home/runner/.ssh;
         echo ${{ secrets.NODE_PRIVATE_KEY }} | base64 -d > /home/runner/.ssh/id_rsa
         chmod 600 /home/runner/.ssh/id_rsa
+        echo ${{ secrets.NODE_PUBLIC_KEY }} | base64 -d > /home/runner/.ssh/id_rsa.pub
         eval `ssh-agent -s`
         ssh-add
         ssh-keyscan -H ${{ secrets.REMOTE_HOST }} > /home/runner/.ssh/known_hosts
-        echo "====> $(pwd)"
-        echo "====> $(whoami)"
-        echo "=========================="
-        cat /home/runner/.ssh/known_hosts
     - name: Create docker context
       run: |
         docker context create remote \
@@ -55,9 +52,7 @@ jobs:
         echo "${{ secrets.HARBOR_SA }}" | base64 -d > ./robot.json;
         username=$(cat robot.json | jq -r .name)
         password=$(cat robot.json | jq -r .secret)
-        echo "===========> $(docker -v)"
         docker context use remote;
-        docker context ls;
         docker login ${{ env.HARBOR_URL }} --username "$username" --password "$password"
     - name: Stop existing container
       run: |
