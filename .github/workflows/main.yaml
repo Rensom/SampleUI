@@ -1,0 +1,57 @@
+name: Main
+
+on: workflow_dispatch
+
+env:
+  TAG_REPO: "157.230.18.253/test/sample"
+  TAG_NAME: "157.230.18.253/test/sample:${{ github.sha }}"
+  HARBOR_URL: "157.230.18.253"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: 'Build docker image'
+      run: |
+        docker build -t $TAG_NAME .
+    - name: 'Login to Harbor'
+      run: |
+        echo ${{ secrets.HARBOR_SA }} | base64 -d > ./robot.json;
+        username=$(cat robot.json | jq -r .name)
+        password=$(cat robot.json | jq -r .secret)
+        echo "$password" | docker login http://${{ env.HARBOR_URL }} --username "$username" --password-stdin
+    - name: 'Push to Harbor registry'
+      run: |
+        docker tag $TAG_NAME $TAG_REPO:latest
+        docker push $TAG_NAME
+        docker push $TAG_REPO:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: 'Add key'
+      run: echo ${{ secrets.NODE_PRIVATE_KEY }} | base64 -d > ~/.ssh/id_rsa
+    - name: Create docker context
+      run: |
+        docker context create remote \
+            --description "Docker remote test" \
+            --docker "host=ssh://${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}"
+    - name: Pull new image
+      run: |
+        echo ${{ secrets.HARBOR_SA }} | base64 -d > ./robot.json;
+        username=$(cat robot.json | jq -r .name)
+        password=$(cat robot.json | jq -r .secret)
+        docker context use remote
+        echo "$password" | docker login http://${{ env.HARBOR_URL }} --username "$username" --password-stdin
+        docker pull $TAG_NAME
+    - name: Stop existing container
+      run: |
+        docker context use remote
+        docker container stop test | true;
+        docker container rm test | true
+    - name: Run new version
+      run: |
+        docker context use remote
+        docker run -d -p 3000:3000 --name test $TAG_NAME
