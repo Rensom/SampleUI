@@ -3,9 +3,9 @@ name: Main
 on: workflow_dispatch
 
 env:
-  TAG_REPO: "157.230.18.253/test/sample"
-  TAG_NAME: "157.230.18.253/test/sample:${{ github.sha }}"
-  HARBOR_URL: "157.230.18.253"
+  TAG_REPO: "harbor.test.dely.io/test/sample"
+  TAG_NAME: "harbor.test.dely.io/test/sample:${{ github.sha }}"
+  HARBOR_URL: "harbor.test.dely.io"
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
         echo ${{ secrets.HARBOR_SA }} | base64 -d > ./robot.json;
         username=$(cat robot.json | jq -r .name)
         password=$(cat robot.json | jq -r .secret)
-        echo "$password" | docker login http://${{ env.HARBOR_URL }} --username "$username" --password-stdin
+        echo "$password" | docker login https://${{ env.HARBOR_URL }} --username "$username" --password-stdin
     - name: 'Push to Harbor registry'
       run: |
         docker tag $TAG_NAME $TAG_REPO:latest
@@ -44,7 +44,7 @@ jobs:
         username=$(cat robot.json | jq -r .name)
         password=$(cat robot.json | jq -r .secret)
         docker context use remote
-        echo "$password" | docker login http://${{ env.HARBOR_URL }} --username "$username" --password-stdin
+        echo "$password" | docker login https://${{ env.HARBOR_URL }} --username "$username" --password-stdin
         docker pull $TAG_NAME
     - name: Stop existing container
       run: |
