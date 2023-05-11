@@ -38,6 +38,9 @@ jobs:
         chmod 600 /home/runner/.ssh/id_rsa
         echo ${{ secrets.NODE_PUBLIC_KEY }} | base64 -d > /home/runner/.ssh/id_rsa.pub
         ssh-keyscan -H ${{ secrets.REMOTE_HOST }} > /home/runner/.ssh/known_hosts
+        ls -lh /home/runner/.ssh
+        echo "=================================="
+        ls -lh /home/runner
     - name: Create docker context
       run: |
         docker context create remote \
