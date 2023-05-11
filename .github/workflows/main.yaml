@@ -41,6 +41,9 @@ jobs:
         ls -lh /home/runner/.ssh
         echo "=================================="
         ls -lh /home/runner
+        echo "=================================="
+        ls -lah
+        echo "====> $(whoami)"
     - name: Create docker context
       run: |
         docker context create remote \
