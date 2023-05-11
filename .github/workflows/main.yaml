@@ -6,6 +6,8 @@ env:
   TAG_REPO: "harbor.test.dely.io/test/sample"
   TAG_NAME: "harbor.test.dely.io/test/sample:${{ github.sha }}"
   HARBOR_URL: "https://harbor.test.dely.io"
+  REMOTE_USERN: "root"
+  REMOTE_HOST_IP: "165.227.143.85"
 
 jobs:
   build:
@@ -39,17 +41,19 @@ jobs:
         ssh-keyscan -H ${{ secrets.REMOTE_HOST }} > /home/runner/.ssh/known_hosts
         echo "====> $(pwd)"
         echo "====> $(whoami)"
-        
+        echo "=========================="
+        cat /home/runner/.ssh/known_hosts
     - name: Create docker context
       run: |
         docker context create remote \
             --description "Docker remote test" \
-            --docker "host=ssh://${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}";
+            --docker "host=ssh://${{ env.REMOTE_USERN }}@${{ env.REMOTE_HOST_IP }}";
     - name: Login to Harbor
       run: |
         echo "${{ secrets.HARBOR_SA }}" | base64 -d > ./robot.json;
         username=$(cat robot.json | jq -r .name)
         password=$(cat robot.json | jq -r .secret)
+        echo "===========> $(docker -v)"
         docker context use remote;
         docker context ls;
         docker login ${{ env.HARBOR_URL }} --username "$username" --password "$password"
