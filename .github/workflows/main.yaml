@@ -51,6 +51,7 @@ jobs:
         username=$(cat robot.json | jq -r .name)
         password=$(cat robot.json | jq -r .secret)
         docker context use remote;
+        docker context ls;
         docker login ${{ env.HARBOR_URL }} --username "$username" --password "$password"
     - name: Stop existing container
       run: |
