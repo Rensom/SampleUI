@@ -33,8 +33,8 @@ jobs:
     steps:
     - name: 'Add key'
       run: |
-        mkdir -p .ssh;
-        echo ${{ secrets.NODE_PRIVATE_KEY }} | base64 -d > ~/.ssh/id_rsa
+        mkdir -p /home/runner/.ssh;
+        echo ${{ secrets.NODE_PRIVATE_KEY }} | base64 -d > /home/runner/.ssh/id_rsa
     - name: Create docker context
       run: |
         docker context create remote \
